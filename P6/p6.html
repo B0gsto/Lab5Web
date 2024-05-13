@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Game</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin: auto;
+        }
+
+        td {
+            width: 50px;
+            height: 50px;
+            border: 1px solid black;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .empty {
+            background-color: lightgray;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h2>Puzzle Game</h2>
+    <table id="puzzleTable"></table>
+
+    <script>
+        var size = 4; // Dimensiunea puzzle-ului
+        var emptyCell = { row: size - 1, col: size - 1 }; // Celula liberă
+
+        // Funcție pentru a crea și inițializa puzzle-ul
+        function createPuzzle() {
+            var numbers = [];
+            for (var i = 1; i <= size * size - 1; i++) {
+                numbers.push(i);
+            }
+            // Adăugăm celula liberă
+            numbers.sort(() => Math.random() - 0.5); // Amestecăm numerele
+            numbers.push("");
+            var puzzleTable = $('#puzzleTable');
+            for (var i = 0; i < size; i++) {
+                var row = $('<tr></tr>');
+                for (var j = 0; j < size; j++) {
+                    var cell = $('<td></td>').text(numbers[i * size + j]);
+                    if (cell.text() === "") {
+                        cell.addClass('empty');
+                    }
+                    row.append(cell);
+                }
+                puzzleTable.append(row);
+            }
+        }
+
+        // Funcție pentru a actualiza și redesena puzzle-ul
+        function updatePuzzle() {
+            $('#puzzleTable td').each(function() {
+                var cell = $(this);
+                cell.text(cell.text());
+                if (cell.text() === "") {
+                    cell.addClass('empty');
+                } else {
+                    cell.removeClass('empty');
+                }
+            });
+        }
+
+        // Funcție pentru a verifica dacă celula este validă (în interiorul tablei)
+        function isValidCell(row, col) {
+            return row >= 0 && row < size && col >= 0 && col < size;
+        }
+
+        // Funcție pentru a interschimba celula liberă cu o celulă adiacentă
+        function swapCells(row, col) {
+            if (isValidCell(row, col)) {
+                var temp = $('#puzzleTable tr').eq(row).find('td').eq(col).text();
+                $('#puzzleTable tr').eq(row).find('td').eq(col).text("");
+                $('#puzzleTable tr').eq(emptyCell.row).find('td').eq(emptyCell.col).text(temp);
+                emptyCell.row = row;
+                emptyCell.col = col;
+            }
+        }
+
+        // Evenimente de tastatură pentru a mișca celula liberă
+        $(document).keydown(function(event) {
+            var key = event.key;
+            var newRow = emptyCell.row;
+            var newCol = emptyCell.col;
+
+            switch(key) {
+                case "ArrowUp":
+                    newRow += 1;
+                    break;
+                case "ArrowDown":
+                    newRow -= 1;
+                    break;
+                case "ArrowLeft":
+                    newCol += 1;
+                    break;
+                case "ArrowRight":
+                    newCol -= 1;
+                    break;
+                default:
+                    return; // Dacă nu este apăsată o tastă de săgeată, ieșim din funcție
+            }
+
+            swapCells(newRow, newCol);
+            updatePuzzle();
+        });
+
+        // Inițializăm și afișăm puzzle-ul la încărcarea paginii
+        $(document).ready(function() {
+            createPuzzle();
+            updatePuzzle();
+        });
+    </script>
+</body>
+</html>
